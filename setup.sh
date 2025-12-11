@@ -68,43 +68,11 @@ download_binary() {
         chmod +x "$INSTALL_DIR/potty"
         echo -e "${GREEN}✓ Potty downloaded${NC}"
     else
-        echo -e "${YELLOW}⚠️  Binary not available, compiling from source${NC}"
-        compile_from_source
+        echo -e "${RED}✖ Failed to download Potty binary${NC}"
+        exit 1
     fi
 }
 
-# Compile from source
-compile_from_source() {
-    echo -e "${YELLOW}🔨 Compiling Potty from source...${NC}"
-
-    # Install Go if not installed
-    if ! command -v go &>/dev/null; then
-        echo -e "${YELLOW}📦 Installing Go...${NC}"
-        wget -q https://go.dev/dl/go1.21.5.linux-amd64.tar.gz
-        rm -rf /usr/local/go
-        tar -C /usr/local -xzf go1.21.5.linux-amd64.tar.gz
-        echo 'export PATH=$PATH:/usr/local/go/bin' > /etc/profile.d/go.sh
-        export PATH=$PATH:/usr/local/go/bin
-        rm go1.21.5.linux-amd64.tar.gz
-    fi
-
-    # Clone and build
-    TEMP_DIR=$(mktemp -d)
-    git clone "$GITHUB_REPO" "$TEMP_DIR/potty-tunnel" > /dev/null 2>&1
-    cd "$TEMP_DIR/potty-tunnel"
-    go mod download > /dev/null 2>&1
-    go build -o potty -ldflags="-s -w" potty
-
-    # Copy binary
-    cp potty "$INSTALL_DIR/potty"
-    chmod +x "$INSTALL_DIR/potty"
-
-    # Cleanup
-    cd /
-    rm -rf "$TEMP_DIR"
-
-    echo -e "${GREEN}✓ Potty compiled and installed${NC}"
-}
 
 # Create systemd service
 create_systemd_service() {
